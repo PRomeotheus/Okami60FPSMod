@@ -2,7 +2,9 @@ name: Release
 
 on:
   push:
-    tags: ['v*']
+    branches: [main]
+    paths: [VERSION]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -20,10 +22,14 @@ jobs:
         run: |
           cp okami60.ini dist/
           cd dist && zip ../Okami60FPSMod.zip dinput8.dll okami60.ini
+      - name: Read version
+        run: echo "VERSION=v$(tr -d '[:space:]' < VERSION)" >> "$GITHUB_ENV"
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
-          name: Okami60FPSMod ${{ github.ref_name }}
+          tag_name: ${{ env.VERSION }}
+          target_commitish: ${{ github.sha }}
+          name: Okami60FPSMod ${{ env.VERSION }}
           files: Okami60FPSMod.zip
           body: |
             - Frame interpolation to 60, 90 or 120 FPS (game logic stays at 30)
