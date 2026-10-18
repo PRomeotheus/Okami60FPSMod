@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install MinGW-w64
+        run: sudo apt-get update && sudo apt-get install -y g++-mingw-w64-x86-64 binutils-mingw-w64-x86-64
+      - name: Build
+        run: sh build.sh
+      - name: Package
+        run: |
+          cp okami60.ini dist/
+          cd dist && zip ../Okami60FPSMod.zip dinput8.dll okami60.ini
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Okami60FPSMod ${{ github.ref_name }}
+          files: Okami60FPSMod.zip
+          body: |
+            - Frame interpolation to 60, 90 or 120 FPS (game logic stays at 30)
+            - Frame Rate option in Options → Display Settings
+            - F8 cycles frame rate, F9 toggles interpolation
+
+            **Install:** extract `dinput8.dll` and `okami60.ini` next to `okami.exe`. On SteamOS / Steam Deck also set the launch option `WINEDLLOVERRIDES="dinput8=n,b" %command%`. See the README for details and uninstall steps.
